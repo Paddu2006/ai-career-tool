@@ -1,401 +1,604 @@
 # ============================================
-# AI Career Tool (with Charts)
+# AI Career Tool — Skill Analyzer
 # Author: Padma Shree
-# Capstone Project 2
+# Features: Skill analysis, Career matching,
+#            Gap analysis, Action plan, Report
 # ============================================
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from datetime import datetime
+import json
+import os
 
-# ============================================
-# SKILL DATABASE
-# ============================================
+# ─────────────────────────────────────────────
+# CAREER DATABASE
+# ─────────────────────────────────────────────
 
-SKILLS_DB = {
-    "Python": ["Data Science", "Software Development", "AI/ML", "Backend"],
-    "SQL": ["Data Analyst", "Database Admin", "Backend"],
-    "Machine Learning": ["AI/ML Engineer", "Data Scientist", "Research"],
-    "Deep Learning": ["AI Researcher", "Computer Vision", "NLP Engineer"],
-    "Data Visualization": ["Data Analyst", "BI Developer", "Data Scientist"],
-    "Statistics": ["Data Scientist", "Data Analyst", "Research"],
-    "R": ["Data Scientist", "Bioinformatics", "Statistician"],
-    "Java": ["Software Engineer", "Android Dev", "Backend"],
-    "JavaScript": ["Frontend Dev", "Full Stack", "Web Dev"],
-    "React": ["Frontend Dev", "UI Engineer"],
-    "HTML": ["Frontend Dev", "Web Designer"],
-    "CSS": ["Frontend Dev", "Web Designer"],
-    "Git": ["All Software Roles"],
-    "Docker": ["DevOps", "Cloud Engineer"],
-    "Cloud": ["Cloud Engineer", "DevOps"],
-    "AWS": ["Cloud Engineer", "DevOps"],
-    "Azure": ["Cloud Engineer", "DevOps"],
-    "Communication": ["All Roles"],
-    "Problem Solving": ["All Roles"],
-    "Teamwork": ["All Roles"],
-    "Leadership": ["Manager", "Tech Lead", "Senior Roles"],
-    "Project Management": ["Project Manager", "Scrum Master"],
-    "Bioinformatics": ["Bioinformatics Scientist", "Computational Biologist"],
-    "Pandas": ["Data Scientist", "Data Analyst"],
-    "NumPy": ["Data Scientist", "Data Analyst"],
-    "Matplotlib": ["Data Scientist", "Data Analyst"],
-    "Seaborn": ["Data Scientist", "Data Analyst"],
-    "Scikit-learn": ["Machine Learning Engineer", "Data Scientist"],
-    "TensorFlow": ["Deep Learning Engineer", "AI Researcher"],
-    "PyTorch": ["Deep Learning Engineer", "AI Researcher"],
-    "Excel": ["Data Analyst", "Business Analyst"],
-    "Tableau": ["Data Analyst", "BI Developer"],
-    "Power BI": ["Data Analyst", "BI Developer"],
-    "Spark": ["Data Engineer", "Big Data Engineer"],
-    "Hadoop": ["Data Engineer", "Big Data Engineer"],
-    "Kafka": ["Data Engineer", "Streaming Engineer"],
+CAREERS = {
+    "Bioinformatician": {
+        "description" : "Analyze biological data using computational tools",
+        "avg_salary"  : "8-20 LPA",
+        "demand"      : "High",
+        "skills_required": {
+            "Python"       : 9,
+            "R"            : 8,
+            "Biology"      : 9,
+            "SQL"          : 6,
+            "Statistics"   : 7,
+            "Linux/Bash"   : 7,
+            "Machine Learning": 5,
+            "Data Visualization": 6
+        },
+        "top_companies": ["TCS Life Sciences", "Strand Life Sciences",
+                          "MedGenome", "Ocimum Bio", "Jubilant Biosys"],
+        "certifications": ["Bioinformatics Specialization (Coursera)",
+                           "Python for Genomics (edX)"],
+        "job_titles"   : ["Bioinformatics Analyst", "Genomics Scientist",
+                          "Computational Biologist"]
+    },
+    "Data Scientist": {
+        "description" : "Extract insights from large datasets using ML and statistics",
+        "avg_salary"  : "10-25 LPA",
+        "demand"      : "Very High",
+        "skills_required": {
+            "Python"       : 9,
+            "Machine Learning": 9,
+            "Statistics"   : 8,
+            "SQL"          : 7,
+            "Data Visualization": 7,
+            "Deep Learning": 6,
+            "R"            : 5,
+            "Cloud"        : 5
+        },
+        "top_companies": ["Google", "Amazon", "Flipkart",
+                          "PhonePe", "Zomato", "CRED"],
+        "certifications": ["Google Data Analytics (Coursera)",
+                           "IBM Data Science Professional"],
+        "job_titles"   : ["Data Scientist", "ML Analyst",
+                          "AI Research Scientist"]
+    },
+    "ML Engineer": {
+        "description" : "Build and deploy machine learning models at scale",
+        "avg_salary"  : "15-35 LPA",
+        "demand"      : "Very High",
+        "skills_required": {
+            "Python"       : 9,
+            "Machine Learning": 9,
+            "Deep Learning": 8,
+            "Cloud"        : 8,
+            "SQL"          : 6,
+            "Statistics"   : 7,
+            "Linux/Bash"   : 7,
+            "Data Visualization": 5
+        },
+        "top_companies": ["Microsoft", "Google", "Meta",
+                          "Uber", "Swiggy", "Ola"],
+        "certifications": ["AWS ML Specialty",
+                           "TensorFlow Developer Certificate"],
+        "job_titles"   : ["ML Engineer", "AI Engineer",
+                          "Deep Learning Engineer"]
+    },
+    "Computational Biologist": {
+        "description" : "Model biological systems using mathematical and computational methods",
+        "avg_salary"  : "8-18 LPA",
+        "demand"      : "High",
+        "skills_required": {
+            "Python"       : 8,
+            "R"            : 9,
+            "Biology"      : 10,
+            "Statistics"   : 9,
+            "Machine Learning": 6,
+            "Linux/Bash"   : 7,
+            "SQL"          : 5,
+            "Data Visualization": 7
+        },
+        "top_companies": ["NCBS Bangalore", "IISc", "TIFR",
+                          "InStem", "Genentech India"],
+        "certifications": ["Systems Biology (MIT OpenCourseWare)",
+                           "Computational Genomics (Johns Hopkins)"],
+        "job_titles"   : ["Computational Biologist", "Research Scientist",
+                          "Systems Biologist"]
+    },
+    "Clinical Data Analyst": {
+        "description" : "Analyze clinical trial and healthcare data",
+        "avg_salary"  : "6-15 LPA",
+        "demand"      : "High",
+        "skills_required": {
+            "SQL"          : 9,
+            "Statistics"   : 8,
+            "R"            : 7,
+            "Python"       : 6,
+            "Biology"      : 7,
+            "Data Visualization": 7,
+            "Machine Learning": 4,
+            "Linux/Bash"   : 4
+        },
+        "top_companies": ["Sun Pharma", "Dr Reddys", "Biocon",
+                          "Cipla", "IQVIA", "Covance"],
+        "certifications": ["SAS Clinical Trials",
+                           "Clinical Data Management (ACDM)"],
+        "job_titles"   : ["Clinical Data Analyst", "Biostatistician",
+                          "Pharmacovigilance Analyst"]
+    },
+    "Biotech Data Analyst": {
+        "description" : "Analyze laboratory and research data in biotech companies",
+        "avg_salary"  : "6-14 LPA",
+        "demand"      : "Medium",
+        "skills_required": {
+            "Python"       : 7,
+            "R"            : 8,
+            "Biology"      : 9,
+            "Statistics"   : 8,
+            "SQL"          : 6,
+            "Data Visualization": 8,
+            "Machine Learning": 5,
+            "Linux/Bash"   : 5
+        },
+        "top_companies": ["Biocon", "Serum Institute",
+                          "Piramal", "Divi's Labs", "Lupin"],
+        "certifications": ["Biostatistics (Johns Hopkins Coursera)",
+                           "R for Data Science"],
+        "job_titles"   : ["Biotech Analyst", "Research Data Analyst",
+                          "Lab Data Scientist"]
+    },
+    "Research Scientist": {
+        "description" : "Conduct original research in biology or computational fields",
+        "avg_salary"  : "6-16 LPA",
+        "demand"      : "Medium",
+        "skills_required": {
+            "Biology"      : 10,
+            "Statistics"   : 9,
+            "R"            : 8,
+            "Python"       : 7,
+            "Machine Learning": 6,
+            "Data Visualization": 7,
+            "SQL"          : 5,
+            "Linux/Bash"   : 6
+        },
+        "top_companies": ["CSIR", "DBT", "ICMR",
+                          "IISc", "IITs", "AIIMS"],
+        "certifications": ["Research Methodology",
+                           "Scientific Writing (Coursera)"],
+        "job_titles"   : ["Research Scientist", "Junior Researcher",
+                          "Postdoctoral Fellow"]
+    },
+    "Full Stack Developer": {
+        "description" : "Build complete web applications from frontend to backend",
+        "avg_salary"  : "8-22 LPA",
+        "demand"      : "Very High",
+        "skills_required": {
+            "Python"       : 8,
+            "SQL"          : 8,
+            "Linux/Bash"   : 7,
+            "Machine Learning": 4,
+            "Statistics"   : 4,
+            "R"            : 2,
+            "Biology"      : 2,
+            "Data Visualization": 6
+        },
+        "top_companies": ["Infosys", "Wipro", "TCS",
+                          "HCL", "Cognizant", "Startups"],
+        "certifications": ["Full Stack Web Dev (Udemy)",
+                           "Django REST Framework"],
+        "job_titles"   : ["Full Stack Developer", "Backend Developer",
+                          "Python Developer"]
+    }
 }
 
-# ============================================
-# JOB DATABASE
-# ============================================
+ALL_SKILLS = [
+    "Python", "R", "Biology", "SQL", "Statistics",
+    "Machine Learning", "Deep Learning", "Linux/Bash",
+    "Data Visualization", "Cloud"
+]
 
-JOBS_DB = pd.DataFrame([
-    {"title": "Data Scientist", "skills": ["Python", "SQL", "Machine Learning", "Statistics", "Data Visualization", "Pandas", "Scikit-learn"], "salary": "8-15 LPA", "growth": "High"},
-    {"title": "Data Analyst", "skills": ["Python", "SQL", "Data Visualization", "Statistics", "Excel", "Tableau"], "salary": "5-10 LPA", "growth": "High"},
-    {"title": "Machine Learning Engineer", "skills": ["Python", "Machine Learning", "Deep Learning", "SQL", "TensorFlow", "PyTorch"], "salary": "10-20 LPA", "growth": "Very High"},
-    {"title": "Software Developer", "skills": ["Python", "Java", "Git", "Problem Solving"], "salary": "6-15 LPA", "growth": "High"},
-    {"title": "Frontend Developer", "skills": ["JavaScript", "React", "HTML", "CSS", "Git"], "salary": "5-12 LPA", "growth": "High"},
-    {"title": "Backend Developer", "skills": ["Python", "SQL", "Git", "Docker", "Java"], "salary": "6-14 LPA", "growth": "High"},
-    {"title": "DevOps Engineer", "skills": ["Docker", "Git", "Cloud", "AWS", "Python"], "salary": "8-18 LPA", "growth": "Very High"},
-    {"title": "Data Engineer", "skills": ["Python", "SQL", "Docker", "Cloud", "Spark", "Kafka"], "salary": "7-16 LPA", "growth": "Very High"},
-    {"title": "Bioinformatics Scientist", "skills": ["Python", "R", "Bioinformatics", "Statistics"], "salary": "6-12 LPA", "growth": "High"},
-    {"title": "AI Researcher", "skills": ["Python", "Deep Learning", "Machine Learning", "Statistics", "TensorFlow", "PyTorch"], "salary": "12-25 LPA", "growth": "Very High"},
-    {"title": "Project Manager", "skills": ["Project Management", "Leadership", "Communication", "Problem Solving"], "salary": "10-20 LPA", "growth": "High"},
-    {"title": "Business Analyst", "skills": ["Excel", "Communication", "Problem Solving", "SQL", "Tableau"], "salary": "6-12 LPA", "growth": "High"},
-    {"title": "Full Stack Developer", "skills": ["JavaScript", "React", "Python", "SQL", "HTML", "CSS", "Git"], "salary": "7-16 LPA", "growth": "High"},
-], columns=["title", "skills", "salary", "growth"])
+# ─────────────────────────────────────────────
+# GET USER SKILLS
+# ─────────────────────────────────────────────
 
-# ============================================
-# EXTRACT SKILLS FROM TEXT
-# ============================================
-
-def extract_skills(text):
-    text = text.lower()
-    found_skills = []
-    for skill in SKILLS_DB.keys():
-        if skill.lower() in text:
-            found_skills.append(skill)
-    return list(set(found_skills))
-
-# ============================================
-# MATCH JOBS
-# ============================================
-
-def match_jobs(skills):
-    matches = []
-    for idx, job in JOBS_DB.iterrows():
-        required_skills = set(job["skills"])
-        user_skills = set(skills)
-        matching_skills = required_skills.intersection(user_skills)
-        missing_skills = required_skills - user_skills
-        if len(required_skills) > 0:
-            match_percent = (len(matching_skills) / len(required_skills)) * 100
-        else:
-            match_percent = 0
-        matches.append({
-            "job_title": job["title"],
-            "match_percent": round(match_percent, 1),
-            "matching_skills": list(matching_skills),
-            "missing_skills": list(missing_skills),
-            "salary": job["salary"],
-            "growth": job["growth"]
-        })
-    matches.sort(key=lambda x: x["match_percent"], reverse=True)
-    return matches
-
-# ============================================
-# RECOMMEND LEARNING
-# ============================================
-
-def recommend_learning(missing_skills):
-    recommendations = []
-    learning_resources = {
-        "Python": "https://www.python.org/about/gettingstarted/",
-        "SQL": "https://www.w3schools.com/sql/",
-        "Machine Learning": "https://www.coursera.org/learn/machine-learning",
-        "Deep Learning": "https://www.deeplearning.ai/",
-        "Data Visualization": "https://www.tableau.com/learn",
-        "Statistics": "https://www.khanacademy.org/math/statistics-probability",
-        "JavaScript": "https://www.javascript.com/",
-        "React": "https://reactjs.org/docs/getting-started.html",
-        "Docker": "https://docs.docker.com/get-started/",
-        "Cloud": "https://aws.amazon.com/training/",
-        "AWS": "https://aws.amazon.com/training/",
-        "Git": "https://git-scm.com/doc",
-        "Pandas": "https://pandas.pydata.org/docs/getting_started/",
-        "NumPy": "https://numpy.org/learn/",
-        "Matplotlib": "https://matplotlib.org/stable/tutorials/index.html",
-        "Scikit-learn": "https://scikit-learn.org/stable/getting_started.html",
-        "Java": "https://www.w3schools.com/java/",
-        "Tableau": "https://www.tableau.com/learn/training",
-        "Excel": "https://support.microsoft.com/en-us/excel",
-    }
-    for skill in missing_skills[:5]:
-        resource = learning_resources.get(skill, f"https://www.google.com/search?q={skill}+tutorial")
-        recommendations.append({"skill": skill, "resource": resource})
-    return recommendations
-
-# ============================================
-# CAREER ANALYSIS
-# ============================================
-
-def career_analysis(skills):
-    domains = set()
-    for skill in skills:
-        if skill in SKILLS_DB:
-            for domain in SKILLS_DB[skill]:
-                domains.add(domain)
-    skill_count = len(skills)
-    if skill_count >= 15:
-        level = "Expert"
-    elif skill_count >= 10:
-        level = "Advanced"
-    elif skill_count >= 5:
-        level = "Intermediate"
-    else:
-        level = "Beginner"
-    base_salary = 3 + (skill_count * 0.5)
-    if "Python" in skills and "Machine Learning" in skills:
-        recommended = "Data Scientist / ML Engineer"
-    elif "Python" in skills and "SQL" in skills:
-        recommended = "Data Analyst / Data Engineer"
-    elif "JavaScript" in skills or "React" in skills:
-        recommended = "Frontend / Full Stack Developer"
-    elif "Java" in skills:
-        recommended = "Software Developer"
-    else:
-        recommended = "Keep learning! Add Python or JavaScript first"
-    return {
-        "domains": list(domains),
-        "skill_level": level,
-        "total_skills": skill_count,
-        "estimated_salary": f"{base_salary:.1f} - {base_salary + 5:.1f} LPA",
-        "recommended_role": recommended
-    }
-
-# ============================================
-# CREATE CHARTS
-# ============================================
-
-def create_charts(matches, skills, name):
-    """Generate career visualization charts"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Chart 1: Top 5 job matches
-    top5 = matches[:5]
-    job_titles = [m["job_title"] for m in top5]
-    match_scores = [m["match_percent"] for m in top5]
-    
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-    fig.suptitle(f"AI Career Tool - Career Dashboard for {name}", fontsize=14, fontweight="bold")
-    
-    # Chart 1: Horizontal bar chart of match scores
-    colors = ["#4CAF50" if s >= 70 else "#FF9800" if s >= 50 else "#E91E63" for s in match_scores]
-    bars1 = axes[0].barh(job_titles, match_scores, color=colors, edgecolor="black")
-    axes[0].set_title("Top 5 Job Matches (%)", fontweight="bold")
-    axes[0].set_xlabel("Match Percentage")
-    axes[0].set_xlim(0, 105)
-    for bar, val in zip(bars1, match_scores):
-        axes[0].text(bar.get_width() + 1, bar.get_y() + bar.get_height()/2, f"{val}%", va="center", fontweight="bold")
-    
-    # Chart 2: Skills analysis
-    skill_count = len(skills)
-    if matches and matches[0]["missing_skills"]:
-        missing_count = len(matches[0]["missing_skills"])
-        values = [skill_count, missing_count]
-        colors2 = ["#2196F3", "#E91E63"]
-        labels2 = ["Your Skills", f"Missing for {matches[0]['job_title']}"]
-    else:
-        values = [skill_count, 0]
-        colors2 = ["#2196F3", "#9E9E9E"]
-        labels2 = ["Your Skills", "No missing skills!"]
-    
-    bars2 = axes[1].bar(labels2, values, color=colors2, edgecolor="black")
-    axes[1].set_title("Skills Gap Analysis", fontweight="bold")
-    axes[1].set_ylabel("Number of Skills")
-    for bar, val in zip(bars2, values):
-        axes[1].text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.2, str(val), ha="center", fontweight="bold")
-    
-    plt.tight_layout()
-    filename = f"career_charts_{name}_{timestamp}.png"
-    plt.savefig(filename, dpi=150, bbox_inches="tight")
-    plt.show()
-    print(f"\n   📊 Chart saved: {filename}")
-    return filename
-
-# ============================================
-# DISPLAY RESULTS
-# ============================================
-
-def display_results(skills, matches, insights, recommendations):
+def get_user_skills():
+    """Collect user skill ratings."""
     print("\n" + "="*60)
-    print("  🤖 AI CAREER TOOL — YOUR RESULTS")
+    print("  SKILL ASSESSMENT")
     print("="*60)
-    print("\n📊 YOUR SKILLS:")
-    if skills:
-        print(f"   {', '.join(skills)}")
-    else:
-        print("   No skills detected.")
-    print("\n📈 CAREER INSIGHTS:")
-    print(f"   Skill Level      : {insights['skill_level']}")
-    print(f"   Total Skills     : {insights['total_skills']}")
-    print(f"   Estimated Salary : {insights['estimated_salary']}")
-    print(f"   Recommended Role : {insights['recommended_role']}")
-    if insights['domains']:
-        print(f"   Matching Domains : {', '.join(insights['domains'][:5])}")
-    print("\n💼 TOP JOB MATCHES:")
-    for i, match in enumerate(matches[:5], 1):
-        print(f"\n   {i}. {match['job_title']} — {match['match_percent']}% match")
-        print(f"      💰 Salary: {match['salary']} | 📈 Growth: {match['growth']}")
-        if match['matching_skills']:
-            print(f"      ✅ Matching: {', '.join(match['matching_skills'][:4])}")
-        if match['missing_skills']:
-            print(f"      ❌ Missing: {', '.join(match['missing_skills'][:3])}")
-    print("\n📚 WHAT TO LEARN NEXT:")
-    if recommendations:
-        for rec in recommendations[:3]:
-            print(f"   • {rec['skill']}")
-            print(f"     → {rec['resource']}")
-    else:
-        print("   Great job! You're already well-matched!")
+    print("  Rate your skills from 0 to 10:")
+    print("  0 = No knowledge")
+    print("  3 = Beginner")
+    print("  5 = Intermediate")
+    print("  7 = Advanced")
+    print("  10 = Expert\n")
+
+    user_skills = {}
+    for skill in ALL_SKILLS:
+        while True:
+            try:
+                score = int(input(f"  {skill:<25}: ").strip())
+                if 0 <= score <= 10:
+                    user_skills[skill] = score
+                    break
+                else:
+                    print("  Please enter a number between 0 and 10!")
+            except ValueError:
+                print("  Please enter a valid number!")
+
+    return user_skills
+
+# ─────────────────────────────────────────────
+# GET USER PROFILE
+# ─────────────────────────────────────────────
+
+def get_user_profile():
+    """Collect user profile information."""
     print("\n" + "="*60)
+    print("  YOUR PROFILE")
+    print("="*60)
+    name       = input("  Name                  : ").strip()
+    education  = input("  Education (e.g. BSc Biology): ").strip()
+    experience = input("  Years of experience   : ").strip()
+    interests  = input("  Interests (e.g. genomics, ML): ").strip()
+    goal       = input("  Career goal in 1 line : ").strip()
 
-# ============================================
-# SAVE REPORT
-# ============================================
+    return {
+        "name"      : name,
+        "education" : education,
+        "experience": experience,
+        "interests" : interests,
+        "goal"      : goal
+    }
 
-def save_report(name, skills, matches, insights):
+# ─────────────────────────────────────────────
+# ANALYZE CAREER MATCH
+# ─────────────────────────────────────────────
+
+def analyze_career_match(user_skills):
+    """Calculate match percentage for each career."""
+    matches = {}
+
+    for career, info in CAREERS.items():
+        required = info["skills_required"]
+        total_required = sum(required.values())
+        score = 0
+
+        for skill, req_level in required.items():
+            user_level = user_skills.get(skill, 0)
+            contribution = min(user_level, req_level)
+            score += contribution
+
+        match_pct = round((score / total_required) * 100, 1)
+        matches[career] = match_pct
+
+    return dict(sorted(matches.items(),
+                       key=lambda x: x[1], reverse=True))
+
+# ─────────────────────────────────────────────
+# GAP ANALYSIS
+# ─────────────────────────────────────────────
+
+def gap_analysis(user_skills, career):
+    """Identify skill gaps for a specific career."""
+    required = CAREERS[career]["skills_required"]
+    gaps     = {}
+
+    for skill, req_level in required.items():
+        user_level = user_skills.get(skill, 0)
+        gap = req_level - user_level
+        if gap > 0:
+            gaps[skill] = {
+                "current" : user_level,
+                "required": req_level,
+                "gap"     : gap
+            }
+
+    return dict(sorted(gaps.items(),
+                       key=lambda x: x[1]["gap"], reverse=True))
+
+# ─────────────────────────────────────────────
+# ACTION PLAN
+# ─────────────────────────────────────────────
+
+def generate_action_plan(gaps, career):
+    """Generate personalized action plan."""
+    info   = CAREERS[career]
+    plan   = []
+
+    if not gaps:
+        plan.append("You are fully qualified for this role!")
+        plan.append("Start applying to companies immediately!")
+        return plan
+
+    # Priority skills to develop
+    for skill, gap_info in list(gaps.items())[:3]:
+        gap = gap_info["gap"]
+        if gap >= 5:
+            plan.append(f"HIGH PRIORITY: Improve {skill} from {gap_info['current']}/10 to {gap_info['required']}/10")
+        elif gap >= 3:
+            plan.append(f"MEDIUM PRIORITY: Improve {skill} from {gap_info['current']}/10 to {gap_info['required']}/10")
+        else:
+            plan.append(f"LOW PRIORITY: Polish {skill} from {gap_info['current']}/10 to {gap_info['required']}/10")
+
+    # Certifications
+    if info["certifications"]:
+        plan.append(f"Recommended certification: {info['certifications'][0]}")
+
+    # Timeline
+    total_gap = sum(g["gap"] for g in gaps.values())
+    if total_gap <= 10:
+        plan.append("Estimated time to be job-ready: 3-6 months")
+    elif total_gap <= 20:
+        plan.append("Estimated time to be job-ready: 6-12 months")
+    else:
+        plan.append("Estimated time to be job-ready: 12-18 months")
+
+    return plan
+
+# ─────────────────────────────────────────────
+# VISUALIZE
+# ─────────────────────────────────────────────
+
+def visualize_results(user_skills, matches, top_career, profile):
+    """Generate career analysis visualization."""
+    fig = plt.figure(figsize=(18, 12))
+    fig.suptitle(f"AI Career Analysis — {profile['name']}",
+                fontsize=14, fontweight="bold")
+    gs  = gridspec.GridSpec(2, 3, figure=fig)
+
+    # Chart 1 — Career match scores
+    ax1    = fig.add_subplot(gs[0, 0:2])
+    careers = list(matches.keys())
+    scores  = list(matches.values())
+    colors1 = ["#E91E63" if s >= 80 else "#4CAF50" if s >= 60
+               else "#FF9800" for s in scores]
+    bars   = ax1.barh(careers[::-1], scores[::-1],
+                     color=colors1[::-1], edgecolor="black")
+    for bar, val in zip(bars, scores[::-1]):
+        ax1.text(val + 0.5, bar.get_y() + bar.get_height()/2,
+                f"{val}%", va="center", fontweight="bold", fontsize=9)
+    ax1.axvline(x=70, color="green", linestyle="--",
+               alpha=0.7, label="Good match (70%)")
+    ax1.set_title("Career Match Scores", fontweight="bold")
+    ax1.set_xlabel("Match Percentage (%)")
+    ax1.set_xlim(0, 115)
+    ax1.legend(fontsize=8)
+
+    # Chart 2 — User skill profile
+    ax2 = fig.add_subplot(gs[0, 2])
+    skills = list(user_skills.keys())
+    values = list(user_skills.values())
+    colors2 = ["#4CAF50" if v >= 7 else "#FF9800" if v >= 4
+               else "#E91E63" for v in values]
+    bars2  = ax2.barh(skills, values, color=colors2, edgecolor="black")
+    for bar, val in zip(bars2, values):
+        ax2.text(val + 0.1, bar.get_y() + bar.get_height()/2,
+                str(val), va="center", fontweight="bold", fontsize=9)
+    ax2.set_title("Your Skill Profile", fontweight="bold")
+    ax2.set_xlabel("Skill Level (0-10)")
+    ax2.set_xlim(0, 12)
+    ax2.axvline(x=7, color="green", linestyle="--", alpha=0.5)
+
+    # Chart 3 — Gap analysis for top career
+    ax3  = fig.add_subplot(gs[1, 0])
+    gaps = gap_analysis(user_skills, top_career)
+    if gaps:
+        gap_skills  = list(gaps.keys())
+        current     = [gaps[s]["current"] for s in gap_skills]
+        required    = [gaps[s]["required"] for s in gap_skills]
+        x           = range(len(gap_skills))
+        ax3.bar([i - 0.2 for i in x], current, 0.4,
+               color="#2196F3", label="Current", edgecolor="black")
+        ax3.bar([i + 0.2 for i in x], required, 0.4,
+               color="#E91E63", label="Required", edgecolor="black")
+        ax3.set_xticks(list(x))
+        ax3.set_xticklabels(gap_skills, rotation=30, ha="right", fontsize=8)
+        ax3.legend()
+    ax3.set_title(f"Skill Gaps — {top_career[:20]}", fontweight="bold")
+    ax3.set_ylabel("Skill Level")
+    ax3.set_ylim(0, 12)
+
+    # Chart 4 — Demand and salary comparison
+    ax4 = fig.add_subplot(gs[1, 1])
+    demand_map  = {"Very High": 4, "High": 3, "Medium": 2, "Low": 1}
+    top5_careers = list(matches.keys())[:5]
+    demands = [demand_map.get(CAREERS[c]["demand"], 2) for c in top5_careers]
+    colors4 = ["#E91E63" if d == 4 else "#4CAF50" if d == 3
+               else "#FF9800" for d in demands]
+    bars4   = ax4.bar([c[:10] for c in top5_careers],
+                     demands, color=colors4, edgecolor="black")
+    ax4.set_yticks([1, 2, 3, 4])
+    ax4.set_yticklabels(["Low", "Medium", "High", "Very High"])
+    ax4.set_title("Market Demand (Top 5 Matches)", fontweight="bold")
+    plt.setp(ax4.xaxis.get_majorticklabels(), rotation=30, ha="right")
+
+    # Chart 5 — Profile summary
+    ax5 = fig.add_subplot(gs[1, 2])
+    ax5.axis("off")
+    summary = f"""
+CAREER ANALYSIS SUMMARY
+
+Name       : {profile['name']}
+Education  : {profile['education'][:20]}
+Experience : {profile['experience']} years
+Goal       : {profile['goal'][:30]}
+
+Top Match  : {list(matches.keys())[0]}
+Score      : {list(matches.values())[0]}%
+
+Salary Range:
+{CAREERS[list(matches.keys())[0]]['avg_salary']}
+
+Date: {datetime.now().strftime('%d-%m-%Y')}
+"""
+    ax5.text(0.05, 0.95, summary, transform=ax5.transAxes,
+            fontsize=9, verticalalignment="top",
+            fontfamily="monospace",
+            bbox=dict(boxstyle="round",
+                     facecolor="lightyellow", alpha=0.5))
+    ax5.set_title("Profile Summary", fontweight="bold")
+
+    plt.tight_layout()
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"career_report_{name}_{timestamp}.txt"
-    with open(filename, "w") as f:
-        f.write("="*60 + "\n")
-        f.write("AI CAREER TOOL — CAREER REPORT\n")
-        f.write(f"Generated: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}\n")
-        f.write(f"Name: {name}\n")
-        f.write("="*60 + "\n\n")
-        f.write("YOUR SKILLS:\n")
-        f.write("-"*40 + "\n")
-        for skill in skills:
-            f.write(f"  - {skill}\n")
-        f.write("\nCAREER INSIGHTS:\n")
-        f.write("-"*40 + "\n")
-        f.write(f"Skill Level      : {insights['skill_level']}\n")
-        f.write(f"Total Skills     : {insights['total_skills']}\n")
-        f.write(f"Estimated Salary : {insights['estimated_salary']}\n")
-        f.write(f"Recommended Role : {insights['recommended_role']}\n")
-        f.write("\nTOP JOB MATCHES:\n")
-        f.write("-"*40 + "\n")
-        for match in matches[:5]:
-            f.write(f"\n{'-'*40}\n")
-            f.write(f"Job Title    : {match['job_title']}\n")
-            f.write(f"Match Score  : {match['match_percent']}%\n")
-            f.write(f"Salary Range : {match['salary']}\n")
-            f.write(f"Growth       : {match['growth']}\n")
-            if match['matching_skills']:
-                f.write(f"Matching     : {', '.join(match['matching_skills'])}\n")
-            if match['missing_skills']:
-                f.write(f"Missing      : {', '.join(match['missing_skills'][:5])}\n")
-        f.write("\n" + "="*60 + "\n")
-        f.write("Report generated by AI Career Tool\n")
-        f.write("Author: Padma Shree | Capstone Project 2\n")
-        f.write("="*60 + "\n")
-    print(f"\n   📄 Report saved: {filename}")
+    filename  = f"career_analysis_{profile['name']}_{timestamp}.png"
+    plt.savefig(filename, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"\n   Chart saved as: {filename}")
     return filename
 
-# ============================================
-# SHOW MENU
-# ============================================
+# ─────────────────────────────────────────────
+# DISPLAY RESULTS
+# ─────────────────────────────────────────────
 
-def show_menu():
-    print("\n" + "="*50)
-    print("  🤖 AI CAREER TOOL")
-    print("="*50)
-    print("  1. Enter your skills manually")
-    print("  2. Paste resume text (extract skills)")
-    print("  3. Sample: Beginner Profile")
-    print("  4. Sample: Advanced Profile")
-    print("  0. Exit")
-    print("="*50)
+def display_results(matches, user_skills, profile):
+    """Display career analysis results."""
+    print("\n" + "="*60)
+    print("  AI CAREER ANALYSIS RESULTS")
+    print("="*60)
+    print(f"  Name      : {profile['name']}")
+    print(f"  Education : {profile['education']}")
+    print(f"  Goal      : {profile['goal']}")
 
-# ============================================
+    print("\n  TOP CAREER MATCHES:")
+    print(f"  {'Career':<30} {'Match%':>8} {'Demand':>10} {'Salary'}")
+    print("  " + "-"*65)
+    for career, score in list(matches.items())[:5]:
+        info   = CAREERS[career]
+        marker = " ← BEST FIT!" if score == max(matches.values()) else ""
+        print(f"  {career:<30} {score:>7}% "
+              f"{info['demand']:>10} "
+              f"{info['avg_salary']}{marker}")
+
+    # Top career details
+    top_career = list(matches.keys())[0]
+    info       = CAREERS[top_career]
+    gaps       = gap_analysis(user_skills, top_career)
+    plan       = generate_action_plan(gaps, top_career)
+
+    print(f"\n  BEST FIT: {top_career}")
+    print(f"  {info['description']}")
+    print(f"  Salary: {info['avg_salary']}")
+    print(f"  Demand: {info['demand']}")
+
+    print(f"\n  TOP COMPANIES:")
+    for company in info["top_companies"][:3]:
+        print(f"    - {company}")
+
+    print(f"\n  JOB TITLES:")
+    for title in info["job_titles"]:
+        print(f"    - {title}")
+
+    if gaps:
+        print(f"\n  SKILL GAPS TO FILL:")
+        for skill, gap_info in list(gaps.items())[:4]:
+            print(f"    {skill:<20}: {gap_info['current']}/10 "
+                  f"→ {gap_info['required']}/10 "
+                  f"(gap: {gap_info['gap']})")
+
+    print(f"\n  ACTION PLAN:")
+    for step in plan:
+        print(f"    - {step}")
+
+    print("="*60)
+
+# ─────────────────────────────────────────────
+# GENERATE REPORT
+# ─────────────────────────────────────────────
+
+def generate_report(matches, user_skills, profile):
+    """Generate career analysis report."""
+    timestamp  = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename   = f"career_report_{profile['name']}_{timestamp}.txt"
+    top_career = list(matches.keys())[0]
+    info       = CAREERS[top_career]
+    gaps       = gap_analysis(user_skills, top_career)
+    plan       = generate_action_plan(gaps, top_career)
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("="*60 + "\n")
+        f.write("AI CAREER ANALYSIS REPORT\n")
+        f.write(f"Generated: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}\n")
+        f.write("="*60 + "\n\n")
+
+        f.write(f"Name         : {profile['name']}\n")
+        f.write(f"Education    : {profile['education']}\n")
+        f.write(f"Experience   : {profile['experience']} years\n")
+        f.write(f"Interests    : {profile['interests']}\n")
+        f.write(f"Career Goal  : {profile['goal']}\n\n")
+
+        f.write("YOUR SKILLS\n")
+        f.write("-"*40 + "\n")
+        for skill, level in user_skills.items():
+            bar = "█" * level
+            f.write(f"  {skill:<25}: {level}/10 {bar}\n")
+
+        f.write("\nCAREER MATCH SCORES\n")
+        f.write("-"*40 + "\n")
+        for career, score in matches.items():
+            f.write(f"  {career:<30}: {score}%\n")
+
+        f.write(f"\nBEST FIT: {top_career}\n")
+        f.write("-"*40 + "\n")
+        f.write(f"Description  : {info['description']}\n")
+        f.write(f"Salary Range : {info['avg_salary']}\n")
+        f.write(f"Market Demand: {info['demand']}\n\n")
+
+        f.write("SKILL GAPS\n")
+        f.write("-"*40 + "\n")
+        for skill, gap_info in gaps.items():
+            f.write(f"  {skill:<20}: {gap_info['current']} → "
+                   f"{gap_info['required']} (gap: {gap_info['gap']})\n")
+
+        f.write("\nACTION PLAN\n")
+        f.write("-"*40 + "\n")
+        for step in plan:
+            f.write(f"  - {step}\n")
+
+        f.write("\nRECOMMENDED CERTIFICATIONS\n")
+        f.write("-"*40 + "\n")
+        for cert in info["certifications"]:
+            f.write(f"  - {cert}\n")
+
+        f.write("\n" + "="*60 + "\n")
+
+    print(f"   Report saved: {filename}")
+    return filename
+
+# ─────────────────────────────────────────────
 # MAIN
-# ============================================
+# ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("\n" + "="*50)
-    print("    AI CAREER TOOL")
-    print("    Author: Padma Shree | Capstone Project 2")
-    print("="*50)
-    
+    print("\n" + "="*60)
+    print("    AI Career Tool — Skill Analyzer")
+    print("    Author: Padma Shree")
+    print("    Careers: Bioinformatics to Tech")
+    print("="*60)
+    print("\n  This tool analyzes your skills and suggests")
+    print("  the best career paths for you!")
+
     while True:
-        show_menu()
-        choice = input("\n👉 Enter choice (0-4): ").strip()
-        
-        if choice == "0":
-            print("\n   Good luck with your career Paddu! 🚀")
+        print("\n  Options:")
+        print("  1. Analyze my career fit")
+        print("  0. Exit")
+
+        choice = input("\n  Enter choice: ").strip()
+
+        if choice == "1":
+            profile     = get_user_profile()
+            user_skills = get_user_skills()
+            matches     = analyze_career_match(user_skills)
+            top_career  = list(matches.keys())[0]
+
+            display_results(matches, user_skills, profile)
+            print("\n  Generating career analysis chart...")
+            visualize_results(user_skills, matches, top_career, profile)
+            print("  Generating career report...")
+            generate_report(matches, user_skills, profile)
+
+        elif choice == "0":
+            print("\n  Best of luck with your career Paddu!")
+            print("  You are going to do amazing things! 🚀")
             break
-        
-        elif choice == "1":
-            name = input("\n📝 Enter your name: ").strip()
-            print("\n📊 Enter your skills (comma-separated)")
-            print("   Example: Python, SQL, Machine Learning, Git, Pandas")
-            skills_input = input("   Skills: ").strip()
-            skills = [s.strip() for s in skills_input.split(",") if s.strip()]
-            
-        elif choice == "2":
-            name = input("\n📝 Enter your name: ").strip()
-            print("\n📄 Paste your resume text below (type 'DONE' on a new line when finished):")
-            lines = []
-            while True:
-                line = input()
-                if line == "DONE":
-                    break
-                lines.append(line)
-            resume_text = " ".join(lines)
-            skills = extract_skills(resume_text)
-            if skills:
-                print(f"\n   ✅ Extracted {len(skills)} skills: {', '.join(skills[:10])}")
-            else:
-                print("\n   ⚠️ No skills found. Try Option 1 to enter manually.")
-            
-        elif choice == "3":
-            name = "Sample_Beginner"
-            skills = ["Python", "HTML", "CSS", "Git", "Excel", "Communication"]
-            print(f"\n   📋 Sample Beginner Profile")
-            print(f"   Skills: {', '.join(skills)}")
-            
-        elif choice == "4":
-            name = "Sample_Advanced"
-            skills = ["Python", "SQL", "Machine Learning", "Data Visualization", 
-                     "Statistics", "Git", "Pandas", "NumPy", "Communication",
-                     "Problem Solving", "Teamwork", "Tableau"]
-            print(f"\n   📋 Sample Advanced Profile")
-            print(f"   Skills: {', '.join(skills)}")
-            
         else:
-            print("   ❌ Invalid choice! Please enter 0-4")
-            continue
-        
-        if not skills:
-            print("   ⚠️ No skills detected! Please try again.")
-            continue
-        
-        matches = match_jobs(skills)
-        insights = career_analysis(skills)
-        if matches and matches[0]["missing_skills"]:
-            recommendations = recommend_learning(matches[0]["missing_skills"])
-        else:
-            recommendations = []
-        
-        display_results(skills, matches, insights, recommendations)
-        save_report(name, skills, matches, insights)
-        
-        # Generate charts
-        chart_file = create_charts(matches, skills, name.replace(" ", "_"))
+            print("  Invalid choice!")

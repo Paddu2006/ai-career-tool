@@ -1,0 +1,13 @@
+============================================================
+AI CAREER ANALYSIS REPORT
+Generated: 19-04-2026 15:07:30
+============================================================
+
+Name         : Padma Shree Jena
+Education    : BSc Bioinformatics
+Experience   : 0 years
+Interests    : Genomics, ML, Web Dev
+Career Goal  : Bridge biology and technology
+
+YOUR SKILLS
+----------------------------------------

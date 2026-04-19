@@ -1,0 +1,13 @@
+============================================================
+AI CAREER ANALYSIS REPORT
+Generated: 18-04-2026 11:26:34
+============================================================
+
+Name         : Paddu
+Education    : BSc in Bioinformatics
+Experience   : 0 years
+Interests    : NGS, Genomics, ML
+Career Goal  : Become a Bioinformatics Data Scientist
+
+YOUR SKILLS
+----------------------------------------

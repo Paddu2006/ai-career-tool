@@ -1,0 +1,64 @@
+============================================================
+AI CAREER ANALYSIS REPORT
+Generated: 19-04-2026 15:10:59
+============================================================
+
+Name         : Padma Shree Jena
+Education    : BSc Bioinformatics
+Experience   : 0 years
+Interests    : Genomics, ML, Web Dev
+Career Goal  : Bridge biology and technology
+
+YOUR SKILLS
+----------------------------------------
+  Python                   : 4/10 ████
+  R                        : 4/10 ████
+  Biology                  : 7/10 ███████
+  SQL                      : 2/10 ██
+  Statistics               : 3/10 ███
+  Machine Learning         : 2/10 ██
+  Deep Learning            : 1/10 █
+  Linux/Bash               : 4/10 ████
+  Data Visualization       : 3/10 ███
+  Cloud                    : 1/10 █
+
+CAREER MATCH SCORES
+----------------------------------------
+  Clinical Data Analyst         : 55.8%
+  Full Stack Developer          : 53.7%
+  Biotech Data Analyst          : 51.8%
+  Bioinformatician              : 50.9%
+  Research Scientist            : 50.0%
+  Computational Biologist       : 47.5%
+  Data Scientist                : 35.7%
+  ML Engineer                   : 33.9%
+
+BEST FIT: Clinical Data Analyst
+----------------------------------------
+Description  : Analyze clinical trial and healthcare data
+Salary Range : 6-15 LPA
+Market Demand: High
+
+SKILL GAPS
+----------------------------------------
+  SQL                 : 2 → 9 (gap: 7)
+  Statistics          : 3 → 8 (gap: 5)
+  Data Visualization  : 3 → 7 (gap: 4)
+  R                   : 4 → 7 (gap: 3)
+  Python              : 4 → 6 (gap: 2)
+  Machine Learning    : 2 → 4 (gap: 2)
+
+ACTION PLAN
+----------------------------------------
+  - HIGH PRIORITY: Improve SQL from 2/10 to 9/10
+  - HIGH PRIORITY: Improve Statistics from 3/10 to 8/10
+  - MEDIUM PRIORITY: Improve Data Visualization from 3/10 to 7/10
+  - Recommended certification: SAS Clinical Trials
+  - Estimated time to be job-ready: 12-18 months
+
+RECOMMENDED CERTIFICATIONS
+----------------------------------------
+  - SAS Clinical Trials
+  - Clinical Data Management (ACDM)
+
+============================================================
